@@ -21,7 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
+    "reflect"
 	"github.com/submariner-io/cloud-prepare/pkg/api"
 )
 
@@ -72,40 +72,55 @@ func formatPorts(ports []api.PortSpec) string {
 // Cloud Provider is supported.
 func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) error {
 	fmt.Println("Create VPC Peering request")
-	fmt.Println("Create VPC Peering request")
-	fmt.Println("Create VPC Peering request")
-	fmt.Printf("\n%+v", target)
-	fmt.Printf("Client id: %s", target.InfraID)
+	fmt.Printf("\n%+v\n", target)
+	//TARGET: &{CloudInfo:{InfraID:gcp-us-west-1-cwylie-zd2sb Region:us-west1 ProjectID:fsi-env2 Client:0xc000454b88}}
 
-	// NETWORK := gc.InfraID + "-network"
-	// TARGET_NETWORK := target.InfraID + "-network"
+	// Extract CloudInfo from Target
+	target_values := reflect.ValueOf(target).Elem()
+	cloud_info := target_values.FieldByName("CloudInfo")
 
-	// _, ok := target.(*gcpCloud)
-	// if !ok {
-	// 	err := errors.New("only GCP clients are supported")
-	// 	reporter.Failed(err)
-	// 	return err
-	// }
+	targetProjectID := fmt.Sprintf("%s", cloud_info.FieldByName("ProjectID"))
+	targetInfraID := fmt.Sprintf("%s", cloud_info.FieldByName("InfraID"))
+	// targetRegion := fmt.Sprintf("%s", cloud_info.FieldByName("Region"))
 
-	// reporter.Started("Started VPC Peering between %q and %q", NETWORK, TARGET_NETWORK)
+	
+	NETWORK_NAME := gc.InfraID+ "-network"
+	TARGET_NETWORK_NAME := targetInfraID+ "-network"
+    NETWORK := fmt.Sprintf("projects/%s/global/networks/%s-network", gc.ProjectID, gc.InfraID)
+    TARGET_NETWORK := fmt.Sprintf("projects/%s/global/networks/%s-network", targetProjectID, targetInfraID)
 
-	// // Create peering request for both networks
-	// peeringRequest := newVpcPeeringRequest(NETWORK, TARGET_NETWORK)
-	// targetPeeringRequest := newVpcPeeringRequest(TARGET_NETWORK, NETWORK)
+	_, ok := target.(*gcpCloud)
+	if !ok {
+		err := errors.New("only GCP clients are supported")
+		reporter.Failed(err)
+		return err
+	}
 
-	// // Peer VPC with Target VPC (A-B)
-	// if err := gc.peerVPCs(gc.ProjectID, NETWORK, peeringRequest, reporter); err != nil {
-	// 	reporter.Failed(err)
-	// 	return err
-	// }
+	reporter.Started("Started VPC Peering between %q and %q", NETWORK, TARGET_NETWORK)
+	
+	// Create peering request for both networks
+	peeringRequest := newVpcPeeringRequest(gc.InfraID, TARGET_NETWORK)
+	targetPeeringRequest := newVpcPeeringRequest(targetInfraID, NETWORK)
 
-	// // Peer Target VPC with VPC (B-A)
-	// if err := gc.peerVPCs(target.ProjectID, TARGET_NETWORK, targetPeeringRequest, reporter); err != nil {
-	// 	reporter.Failed(err)
-	// 	return err
-	// }
+	// Print PeeringRequests
+	fmt.Printf("\nPeering Request 1: \n%+v\n", peeringRequest)
+	fmt.Printf("\nPeering Request 2: \n%+v\n", targetPeeringRequest)
+	// Peer VPC with Target VPC (A-B)
+	if err := gc.peerVPCs(gc.ProjectID, NETWORK_NAME, peeringRequest, reporter); err != nil {
+		
+		err := errors.New("Failed peering to target")
+		reporter.Failed(err)
+		return err
+	}
 
-	// reporter.Succeeded("Peered VPCs %q and %q", NETWORK, TARGET_NETWORK)
+	// Peer Target VPC with VPC (B-A)
+	if err := gc.peerVPCs(targetProjectID, TARGET_NETWORK, targetPeeringRequest, reporter); err != nil {
+		err := errors.New("Failed peering from target to host")
+		reporter.Failed(err)
+		return err
+	}
+
+	reporter.Succeeded("Peered VPCs %q and %q", NETWORK, TARGET_NETWORK)
 
 	return nil
 	// return errors.New("GCP CreateVpcPeering not implemented")

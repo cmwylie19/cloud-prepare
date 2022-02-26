@@ -23,19 +23,20 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-func newVpcPeeringRequest(network, targetNetwork string) *compute.NetworksAddPeeringRequest {
+func newVpcPeeringRequest(infraID, targetNetwork string) *compute.NetworksAddPeeringRequest {
 	return &compute.NetworksAddPeeringRequest{
-		Name:        generatePeeringName(network, targetNetwork),
+		Name:        generatePeeringName(infraID),
 		PeerNetwork: targetNetwork,
 		NetworkPeering: &compute.NetworkPeering{
 			ImportCustomRoutes:   true,
+			Network: targetNetwork,
 			ExchangeSubnetRoutes: true,
 		},
 	}
 }
 
-func generatePeeringName(network, targetNetwork string) (peeringName string) {
-	return fmt.Sprintf("%s-%s-peering", network, targetNetwork)
+func generatePeeringName(infraID string) string {
+	return fmt.Sprintf("%s-peering", infraID)
 }
 
 // // update to accommodate custom ports
