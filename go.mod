@@ -1,4 +1,4 @@
-module github.com/cmwylie19/cloud-prepare
+module github.com/submariner-io/cloud-prepare
 
 go 1.13
 
