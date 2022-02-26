@@ -163,3 +163,12 @@ func (ac *awsCloud) CleanupAfterSubmariner(reporter api.Reporter) error {
 func (ac *awsCloud) validateCleanupPrerequisites(vpcID string) error {
 	return ac.validateDeleteSecGroupRule(vpcID)
 }
+
+func (ac *awsCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) error {
+	return errors.New("AWS CreateVpcPeering not implemented")
+}
+
+// CleanupVpcPeering Removes the VPC Peering with the target cloud and the related Routes.
+func (ac *awsCloud) CleanupVpcPeering(target api.Cloud, reporter api.Reporter) error {
+	return errors.New("AWS CleanupVpcPeering not implemented")
+}

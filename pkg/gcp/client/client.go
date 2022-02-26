@@ -55,7 +55,7 @@ type gcpClient struct {
 }
 
 func (g *gcpClient) PeerVPCs(projectID, networkName string, peeringRequest *compute.NetworksAddPeeringRequest) error {
-	_, err := g.computeClient.Networks.AddPeering(projectID, *peeringRequest.name, *peeringRequest).Context(context.TODO()).Do()
+	_, err := g.computeClient.Networks.AddPeering(projectID, peeringRequest.Name, peeringRequest).Context(context.TODO()).Do()
 	return err
 }
 

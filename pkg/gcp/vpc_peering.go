@@ -23,7 +23,7 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-func newVpcPeeringRequest(network, targetNetwork string) (peeringRequest *compute.NetworksAddPeeringRequest) {
+func newVpcPeeringRequest(network, targetNetwork string) *compute.NetworksAddPeeringRequest {
 	return &compute.NetworksAddPeeringRequest{
 		Name:        generatePeeringName(network, targetNetwork),
 		PeerNetwork: targetNetwork,

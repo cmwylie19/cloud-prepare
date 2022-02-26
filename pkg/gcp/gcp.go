@@ -72,35 +72,40 @@ func formatPorts(ports []api.PortSpec) string {
 // Cloud Provider is supported.
 func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) error {
 	fmt.Println("Create VPC Peering request")
-	NETWORK := gc.InfraID + "-network"
-	TARGET_NETWORK := target.InfraID + "-network"
+	fmt.Println("Create VPC Peering request")
+	fmt.Println("Create VPC Peering request")
+	fmt.Printf("\n%+v", target)
+	fmt.Printf("Client id: %s", target.InfraID)
 
-	_, ok := target.(*gcpCloud)
-	if !ok {
-		err := errors.New("only GCP clients are supported")
-		reporter.Failed(err)
-		return err
-	}
+	// NETWORK := gc.InfraID + "-network"
+	// TARGET_NETWORK := target.InfraID + "-network"
 
-	reporter.Started("Started VPC Peering between %q and %q", NETWORK, TARGET_NETWORK)
+	// _, ok := target.(*gcpCloud)
+	// if !ok {
+	// 	err := errors.New("only GCP clients are supported")
+	// 	reporter.Failed(err)
+	// 	return err
+	// }
 
-	// Create peering request for both networks
-	peeringRequest := newVpcPeeringRequest(NETWORK, TARGET_NETWORK)
-	targetPeeringRequest := newVpcPeeringRequest(TARGET_NETWORK, NETWORK)
+	// reporter.Started("Started VPC Peering between %q and %q", NETWORK, TARGET_NETWORK)
 
-	// Peer VPC with Target VPC (A-B)
-	if err := gc.peerVPCs(gc.ProjectID, NETWORK, peeringRequest, reporter); err != nil {
-		reporter.Failed(err)
-		return err
-	}
+	// // Create peering request for both networks
+	// peeringRequest := newVpcPeeringRequest(NETWORK, TARGET_NETWORK)
+	// targetPeeringRequest := newVpcPeeringRequest(TARGET_NETWORK, NETWORK)
 
-	// Peer Target VPC with VPC (B-A)
-	if err := gc.peerVPCs(target.ProjectID, TARGET_NETWORK, targetPeeringRequest, reporter); err != nil {
-		reporter.Failed(err)
-		return err
-	}
+	// // Peer VPC with Target VPC (A-B)
+	// if err := gc.peerVPCs(gc.ProjectID, NETWORK, peeringRequest, reporter); err != nil {
+	// 	reporter.Failed(err)
+	// 	return err
+	// }
 
-	reporter.Succeeded("Peered VPCs %q and %q", NETWORK, TARGET_NETWORK)
+	// // Peer Target VPC with VPC (B-A)
+	// if err := gc.peerVPCs(target.ProjectID, TARGET_NETWORK, targetPeeringRequest, reporter); err != nil {
+	// 	reporter.Failed(err)
+	// 	return err
+	// }
+
+	// reporter.Succeeded("Peered VPCs %q and %q", NETWORK, TARGET_NETWORK)
 
 	return nil
 	// return errors.New("GCP CreateVpcPeering not implemented")
