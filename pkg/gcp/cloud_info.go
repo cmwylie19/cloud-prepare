@@ -71,3 +71,13 @@ func (c *CloudInfo) deleteFirewallRule(name string, reporter api.Reporter) error
 
 	return nil
 }
+
+func (c *CloudInfo) peerVPCs(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest, reporter api.Reporter) error {
+	reporter.Started("Peering VPC %s with %s GCP", network, peeringRequest.PeerNetwork)
+	if err := c.Client.PeerVPCs(projectID, network, peeringRequest); err != nil {
+		reporter.Failed(err)
+		return errors.Wrapf(err, "error peering vpc %q on GCP", peeringRequest.Name)
+	}
+	reporter.Succeeded("Peered VPC %s with %s GCP", network, peeringRequest.PeerNetwork)
+	return nil
+}

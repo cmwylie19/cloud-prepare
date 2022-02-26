@@ -35,6 +35,7 @@ import (
 
 // Interface wraps an actual GCP library client to allow for easier testing.
 type Interface interface {
+	PeerVPCs(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest) error
 	InsertFirewallRule(projectID string, rule *compute.Firewall) error
 	GetFirewallRule(projectID, name string) (*compute.Firewall, error)
 	DeleteFirewallRule(projectID, name string) error
@@ -51,6 +52,11 @@ type Interface interface {
 type gcpClient struct {
 	projectID     string
 	computeClient *compute.Service
+}
+
+func (g *gcpClient) PeerVPCs(projectID, networkName string, peeringRequest *compute.NetworksAddPeeringRequest) error {
+	_, err := g.computeClient.Networks.AddPeering(projectID, *peeringRequest.name, *peeringRequest).Context(context.TODO()).Do()
+	return err
 }
 
 func (g *gcpClient) InsertFirewallRule(projectID string, rule *compute.Firewall) error {

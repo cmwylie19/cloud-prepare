@@ -18,6 +18,7 @@ limitations under the License.
 package gcp
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -65,4 +66,47 @@ func formatPorts(ports []api.PortSpec) string {
 	}
 
 	return strings.Join(portStrs, ", ")
+}
+
+// CreateVpcPeering Creates a VPC Peering to the target cloud. Only the same
+// Cloud Provider is supported.
+func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) error {
+	fmt.Println("Create VPC Peering request")
+	NETWORK := gc.InfraID + "-network"
+	TARGET_NETWORK := target.InfraID + "-network"
+
+	_, ok := target.(*gcpCloud)
+	if !ok {
+		err := errors.New("only GCP clients are supported")
+		reporter.Failed(err)
+		return err
+	}
+
+	reporter.Started("Started VPC Peering between %q and %q", NETWORK, TARGET_NETWORK)
+
+	// Create peering request for both networks
+	peeringRequest := newVpcPeeringRequest(NETWORK, TARGET_NETWORK)
+	targetPeeringRequest := newVpcPeeringRequest(TARGET_NETWORK, NETWORK)
+
+	// Peer VPC with Target VPC (A-B)
+	if err := gc.peerVPCs(gc.ProjectID, NETWORK, peeringRequest, reporter); err != nil {
+		reporter.Failed(err)
+		return err
+	}
+
+	// Peer Target VPC with VPC (B-A)
+	if err := gc.peerVPCs(target.ProjectID, TARGET_NETWORK, targetPeeringRequest, reporter); err != nil {
+		reporter.Failed(err)
+		return err
+	}
+
+	reporter.Succeeded("Peered VPCs %q and %q", NETWORK, TARGET_NETWORK)
+
+	return nil
+	// return errors.New("GCP CreateVpcPeering not implemented")
+}
+
+// CleanupVpcPeering Removes the VPC Peering with the target cloud and the related Routes.
+func (gc *gcpCloud) CleanupVpcPeering(target api.Cloud, reporter api.Reporter) error {
+	return errors.New("GCP CleanupVpcPeering not implemented")
 }
