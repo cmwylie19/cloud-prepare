@@ -114,13 +114,13 @@ func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) er
 	}
 
 	// Peer Target VPC with VPC (B-A)
-	if err := gc.peerVPCs(targetProjectID, TARGET_NETWORK, targetPeeringRequest, reporter); err != nil {
+	if err := gc.peerVPCs(targetProjectID, TARGET_NETWORK_NAME, targetPeeringRequest, reporter); err != nil {
 		err := errors.New("Failed peering from target to host")
 		reporter.Failed(err)
 		return err
 	}
 
-	reporter.Succeeded("Peered VPCs %q and %q", NETWORK, TARGET_NETWORK)
+	reporter.Succeeded("Peered VPCs %q and %q", NETWORK_NAME, TARGET_NETWORK_NAME)
 
 	return nil
 	// return errors.New("GCP CreateVpcPeering not implemented")
