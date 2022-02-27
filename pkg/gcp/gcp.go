@@ -71,9 +71,6 @@ func formatPorts(ports []api.PortSpec) string {
 // CreateVpcPeering Creates a VPC Peering to the target cloud. Only the same
 // Cloud Provider is supported.
 func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) error {
-	fmt.Println("Create VPC Peering request")
-	fmt.Printf("\n%+v\n", target)
-	//TARGET: &{CloudInfo:{InfraID:gcp-us-west-1-cwylie-zd2sb Region:us-west1 ProjectID:fsi-env2 Client:0xc000454b88}}
 
 	// Extract CloudInfo from Target
 	target_values := reflect.ValueOf(target).Elem()
@@ -81,7 +78,7 @@ func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) er
 
 	targetProjectID := fmt.Sprintf("%s", cloud_info.FieldByName("ProjectID"))
 	targetInfraID := fmt.Sprintf("%s", cloud_info.FieldByName("InfraID"))
-	// targetRegion := fmt.Sprintf("%s", cloud_info.FieldByName("Region"))
+
 
 	
 	NETWORK_NAME := gc.InfraID+ "-network"
@@ -102,9 +99,6 @@ func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) er
 	peeringRequest := newVpcPeeringRequest(gc.InfraID, TARGET_NETWORK)
 	targetPeeringRequest := newVpcPeeringRequest(targetInfraID, NETWORK)
 
-	// Print PeeringRequests
-	fmt.Printf("\nPeering Request 1: \n%+v\n", peeringRequest)
-	fmt.Printf("\nPeering Request 2: \n%+v\n", targetPeeringRequest)
 	// Peer VPC with Target VPC (A-B)
 	if err := gc.peerVPCs(gc.ProjectID, NETWORK_NAME, peeringRequest, reporter); err != nil {
 		
@@ -123,7 +117,6 @@ func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) er
 	reporter.Succeeded("Peered VPCs %q and %q", NETWORK_NAME, TARGET_NETWORK_NAME)
 
 	return nil
-	// return errors.New("GCP CreateVpcPeering not implemented")
 }
 
 // CleanupVpcPeering Removes the VPC Peering with the target cloud and the related Routes.

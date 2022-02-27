@@ -27,11 +27,13 @@ func newVpcPeeringRequest(infraID, targetNetwork string) *compute.NetworksAddPee
 	return &compute.NetworksAddPeeringRequest{
 		Name:        generatePeeringName(infraID),
 		PeerNetwork: targetNetwork,
-		NetworkPeering: &compute.NetworkPeering{
-			ImportCustomRoutes:   true,
-			Network: targetNetwork,
-			ExchangeSubnetRoutes: true,
-		},
+		AutoCreateRoutes: true,
+		// This causes the request to fail
+		
+		// NetworkPeering: &compute.NetworkPeering{
+		// 	ImportCustomRoutes:   true,
+		// 	ExchangeSubnetRoutes: true,
+		// },
 	}
 }
 
@@ -39,20 +41,3 @@ func generatePeeringName(infraID string) string {
 	return fmt.Sprintf("%s-peering", infraID)
 }
 
-// // update to accommodate custom ports
-// func getVpcPeeringPorts() []api.PortSpec {
-// 	return []api.PortSpec{
-// 		{
-// 			Port:     500,
-// 			Protocol: "UDP",
-// 		},
-// 		{
-// 			Port:     4500,
-// 			Protocol: "UDP",
-// 		},
-// 		{
-// 			Port:     4800,
-// 			Protocol: "UDP",
-// 		},
-// 	}
-// }
