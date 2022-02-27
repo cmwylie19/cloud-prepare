@@ -136,6 +136,8 @@ func (gc *gcpCloud) CleanupVpcPeering(target api.Cloud, reporter api.Reporter) e
 
 	NETWORK_NAME := gc.InfraID + "-network"
 	TARGET_NETWORK_NAME := targetInfraID + "-network"
+	NETWORK := fmt.Sprintf("projects/%s/global/networks/%s-network", gc.ProjectID, gc.InfraID)
+	TARGET_NETWORK := fmt.Sprintf("projects/%s/global/networks/%s-network", targetProjectID, targetInfraID)
 
 	reporter.Started("Started Removing VPC Peering between %q and %q", NETWORK, TARGET_NETWORK)
 
@@ -144,7 +146,7 @@ func (gc *gcpCloud) CleanupVpcPeering(target api.Cloud, reporter api.Reporter) e
 	targetRemovePeeringRequest := removeVpcPeeringRequest(targetInfraID)
 
 	// Peer VPC with Target VPC (A-B)
-	if err := gc.RemoveVpcPeering(gc.ProjectID, NETWORK_NAME, removePeeringRequest, reporter); err != nil {
+	if err := gc.removeVpcPeering(gc.ProjectID, NETWORK_NAME, removePeeringRequest, reporter); err != nil {
 
 		err := errors.New("Failed peering removal on target")
 		reporter.Failed(err)
@@ -152,7 +154,7 @@ func (gc *gcpCloud) CleanupVpcPeering(target api.Cloud, reporter api.Reporter) e
 	}
 
 	// Peer Target VPC with VPC (B-A)
-	if err := gc.RemoveVpcPeering(targetProjectID, TARGET_NETWORK_NAME, targetRemovePeeringRequest, reporter); err != nil {
+	if err := gc.removeVpcPeering(targetProjectID, TARGET_NETWORK_NAME, targetRemovePeeringRequest, reporter); err != nil {
 		err := errors.New("Failed peering removal on host")
 		reporter.Failed(err)
 		return err
