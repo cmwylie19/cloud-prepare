@@ -23,13 +23,18 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+func removeVpcPeeringRequest(infraID string) *compute.NetworksRemovePeeringRequest {
+	return &compute.NetworksRemovePeeringRequest{
+		Name: generatePeeringName(infraID),
+	}
+}
 func newVpcPeeringRequest(infraID, targetNetwork string) *compute.NetworksAddPeeringRequest {
 	return &compute.NetworksAddPeeringRequest{
-		Name:        generatePeeringName(infraID),
-		PeerNetwork: targetNetwork,
+		Name:             generatePeeringName(infraID),
+		PeerNetwork:      targetNetwork,
 		AutoCreateRoutes: true,
 		// This causes the request to fail
-		
+
 		// NetworkPeering: &compute.NetworkPeering{
 		// 	ImportCustomRoutes:   true,
 		// 	ExchangeSubnetRoutes: true,
@@ -40,4 +45,3 @@ func newVpcPeeringRequest(infraID, targetNetwork string) *compute.NetworksAddPee
 func generatePeeringName(infraID string) string {
 	return fmt.Sprintf("%s-peering", infraID)
 }
-

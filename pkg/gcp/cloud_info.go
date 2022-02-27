@@ -72,12 +72,22 @@ func (c *CloudInfo) deleteFirewallRule(name string, reporter api.Reporter) error
 	return nil
 }
 
-func (c *CloudInfo) peerVPCs(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest, reporter api.Reporter) error {
+func (c *CloudInfo) peerVpcs(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest, reporter api.Reporter) error {
 	reporter.Started("Peering VPC %s with %s GCP", network, peeringRequest.PeerNetwork)
-	if err := c.Client.PeerVPCs(projectID, network, peeringRequest); err != nil {
+	if err := c.Client.PeerVpcs(projectID, network, peeringRequest); err != nil {
 		reporter.Failed(err)
 		return errors.Wrapf(err, "error peering vpc %q on GCP", peeringRequest.Name)
 	}
 	reporter.Succeeded("Peered VPC %s with %s GCP", network, peeringRequest.PeerNetwork)
+	return nil
+}
+
+func (c *CloudInfo) removeVpcPeering(projectID, network string, removePeeringRequest *compute.NetworksRemovePeeringRequest, reporter api.Reporter) error {
+	reporter.Started("Removing VPC Peering %s.", removePeeringRequest.Name)
+	if err := c.Client.RemoveVpcPeering(projectID, network, removePeeringRequest); err != nil {
+		reporter.Failed(err)
+		return errors.Wrapf(err, "error peering vpc %q on GCP", removePeeringRequest.Name)
+	}
+	reporter.Succeeded("Removed VPC Peering %s.", network, removePeeringRequest.Name)
 	return nil
 }

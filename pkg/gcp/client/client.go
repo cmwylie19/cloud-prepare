@@ -35,7 +35,8 @@ import (
 
 // Interface wraps an actual GCP library client to allow for easier testing.
 type Interface interface {
-	PeerVPCs(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest) error
+	RemoveVpcPeering(projectID, networkName string, removePeeringRequest *compute.NetworksRemovePeeringRequest) error
+	PeerVpcs(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest) error
 	InsertFirewallRule(projectID string, rule *compute.Firewall) error
 	GetFirewallRule(projectID, name string) (*compute.Firewall, error)
 	DeleteFirewallRule(projectID, name string) error
@@ -54,7 +55,11 @@ type gcpClient struct {
 	computeClient *compute.Service
 }
 
-func (g *gcpClient) PeerVPCs(projectID, networkName string, peeringRequest *compute.NetworksAddPeeringRequest) error {
+func (g *gcpClient) RemoveVpcPeering(projectID, networkName string, removePeeringRequest *compute.NetworksRemovePeeringRequest) error {
+	_, err := g.computeClient.Networks.RemovePeering(projectID, networkName, removePeeringRequest).Context(context.TODO()).Do()
+	return err
+}
+func (g *gcpClient) PeerVpcs(projectID, networkName string, peeringRequest *compute.NetworksAddPeeringRequest) error {
 	_, err := g.computeClient.Networks.AddPeering(projectID, networkName, peeringRequest).Context(context.TODO()).Do()
 	return err
 }

@@ -30,20 +30,7 @@ const (
 	publicPortsRuleName      = "submariner-public-ports"
 	internalPortsRuleName    = "submariner-internal-ports"
 	submarinerGatewayNodeTag = "submariner-io-gateway-node"
-	// vpcPeeringInRuleName     = "submariner-peering-in"
-	// vpcPeeringOutRuleName    = "submariner-peering-out"
 )
-
-// func newVpcPeeringFirewallRule(projectID, infraID string, ports []api.PortSpec) (ingress *compute.Firewall) {
-// 	ruleName := generateRuleName(infraID, vpcPeeringInRuleName)
-
-// 	ingressRule := newFirewallRule(projectID, infraID, ruleName, ingressDirection, ports)
-// 	ingressRule.TargetTags = []string{
-// 		submarinerGatewayNodeTag,
-// 	}
-
-// 	return ingressRule
-// }
 
 func newExternalFirewallRules(projectID, infraID string, ports []api.PortSpec) (ingress *compute.Firewall) {
 	ingressName := generateRuleName(infraID, publicPortsRuleName)
