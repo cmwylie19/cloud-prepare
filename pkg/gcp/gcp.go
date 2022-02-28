@@ -20,7 +20,6 @@ package gcp
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/submariner-io/cloud-prepare/pkg/api"
@@ -72,19 +71,7 @@ func formatPorts(ports []api.PortSpec) string {
 // CreateVpcPeering Creates a VPC Peering to the target cloud. Only the same
 // Cloud Provider is supported.
 func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) error {
-
-	// Extract CloudInfo from Target
-	target_values := reflect.ValueOf(target).Elem()
-	cloud_info := target_values.FieldByName("CloudInfo")
-
-	targetProjectID := fmt.Sprintf("%s", cloud_info.FieldByName("ProjectID"))
-	targetInfraID := fmt.Sprintf("%s", cloud_info.FieldByName("InfraID"))
-
-	NETWORK_NAME := gc.InfraID + "-network"
-	TARGET_NETWORK_NAME := targetInfraID + "-network"
-	NETWORK := fmt.Sprintf("projects/%s/global/networks/%s-network", gc.ProjectID, gc.InfraID)
-	TARGET_NETWORK := fmt.Sprintf("projects/%s/global/networks/%s-network", targetProjectID, targetInfraID)
-
+	// validate type
 	_, ok := target.(*gcpCloud)
 	if !ok {
 		err := errors.New("only GCP clients are supported")
@@ -92,24 +79,35 @@ func (gc *gcpCloud) CreateVpcPeering(target api.Cloud, reporter api.Reporter) er
 		return err
 	}
 
+	// https://cloud.google.com/vpc/docs/vpc-peering
+
+	// Validate Peering does not already exist
+
+	// get values from target
+	targetProjectID, targetInfraID := ExtractValuesFromTarget(target)
+
+	NETWORK_NAME := gc.InfraID + "-network"
+	TARGET_NETWORK_NAME := targetInfraID + "-network"
+	NETWORK := GetNetworkURL(gc.ProjectID, gc.InfraID)
+	TARGET_NETWORK := GetNetworkURL(targetProjectID, targetInfraID)
+
 	reporter.Started("Started VPC Peering between %q and %q", NETWORK, TARGET_NETWORK)
 
 	// Create peering request for both networks
-	peeringRequest := newVpcPeeringRequest(gc.InfraID, TARGET_NETWORK)
-	targetPeeringRequest := newVpcPeeringRequest(targetInfraID, NETWORK)
+	peeringRequest := NewVpcPeeringRequest(gc.InfraID, TARGET_NETWORK)
+	targetPeeringRequest := NewVpcPeeringRequest(targetInfraID, NETWORK)
 
 	// Peer VPC with Target VPC (A-B)
-	if err := gc.peerVpcs(gc.ProjectID, NETWORK_NAME, peeringRequest, reporter); err != nil {
-
-		err := errors.New("Failed peering to target")
-		reporter.Failed(err)
+	if err := gc.createVpcPeering(gc.ProjectID, NETWORK_NAME, peeringRequest, reporter); err != nil {
+		err_msg := errors.New("Failed peering to target")
+		reporter.Failed(err_msg, err)
 		return err
 	}
 
 	// Peer Target VPC with VPC (B-A)
-	if err := gc.peerVpcs(targetProjectID, TARGET_NETWORK_NAME, targetPeeringRequest, reporter); err != nil {
-		err := errors.New("Failed peering from target to host")
-		reporter.Failed(err)
+	if err := gc.createVpcPeering(targetProjectID, TARGET_NETWORK_NAME, targetPeeringRequest, reporter); err != nil {
+		err_msg := errors.New("Failed peering from target to host")
+		reporter.Failed(err_msg, err)
 		return err
 	}
 
@@ -127,36 +125,31 @@ func (gc *gcpCloud) CleanupVpcPeering(target api.Cloud, reporter api.Reporter) e
 		return err
 	}
 
-	// Extract CloudInfo from Target
-	target_values := reflect.ValueOf(target).Elem()
-	cloud_info := target_values.FieldByName("CloudInfo")
-
-	targetProjectID := fmt.Sprintf("%s", cloud_info.FieldByName("ProjectID"))
-	targetInfraID := fmt.Sprintf("%s", cloud_info.FieldByName("InfraID"))
+	// get values from target
+	targetProjectID, targetInfraID := ExtractValuesFromTarget(target)
 
 	NETWORK_NAME := gc.InfraID + "-network"
 	TARGET_NETWORK_NAME := targetInfraID + "-network"
-	NETWORK := fmt.Sprintf("projects/%s/global/networks/%s-network", gc.ProjectID, gc.InfraID)
-	TARGET_NETWORK := fmt.Sprintf("projects/%s/global/networks/%s-network", targetProjectID, targetInfraID)
+	NETWORK := GetNetworkURL(gc.ProjectID, gc.InfraID)
+	TARGET_NETWORK := GetNetworkURL(targetProjectID, targetInfraID)
 
 	reporter.Started("Started Removing VPC Peering between %q and %q", NETWORK, TARGET_NETWORK)
 
 	// Create  remove peering request for both networks
-	removePeeringRequest := removeVpcPeeringRequest(gc.InfraID)
-	targetRemovePeeringRequest := removeVpcPeeringRequest(targetInfraID)
+	removePeeringRequest := RemoveVpcPeeringRequest(gc.InfraID)
+	targetRemovePeeringRequest := RemoveVpcPeeringRequest(targetInfraID)
 
 	// Peer VPC with Target VPC (A-B)
-	if err := gc.removeVpcPeering(gc.ProjectID, NETWORK_NAME, removePeeringRequest, reporter); err != nil {
-
-		err := errors.New("Failed peering removal on target")
-		reporter.Failed(err)
+	if err := gc.deleteVpcPeering(gc.ProjectID, NETWORK_NAME, removePeeringRequest, reporter); err != nil {
+		err_msg := errors.New("Failed peering removal on host")
+		reporter.Failed(err, err_msg)
 		return err
 	}
 
 	// Peer Target VPC with VPC (B-A)
-	if err := gc.removeVpcPeering(targetProjectID, TARGET_NETWORK_NAME, targetRemovePeeringRequest, reporter); err != nil {
-		err := errors.New("Failed peering removal on host")
-		reporter.Failed(err)
+	if err := gc.deleteVpcPeering(targetProjectID, TARGET_NETWORK_NAME, targetRemovePeeringRequest, reporter); err != nil {
+		err_msg := errors.New("Failed peering removal on target")
+		reporter.Failed(err, err_msg)
 		return err
 	}
 

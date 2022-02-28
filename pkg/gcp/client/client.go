@@ -35,9 +35,9 @@ import (
 
 // Interface wraps an actual GCP library client to allow for easier testing.
 type Interface interface {
-	GetVpcPeering(projectID, networkName string) (*compute.Network, error)
-	RemoveVpcPeering(projectID, networkName string, removePeeringRequest *compute.NetworksRemovePeeringRequest) error
-	PeerVpcs(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest) error
+	GetNetwork(projectID, networkName string) (*compute.Network, error)
+	DeleteVpcPeering(projectID, networkName string, removePeeringRequest *compute.NetworksRemovePeeringRequest) error
+	CreateVpcPeering(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest) error
 	InsertFirewallRule(projectID string, rule *compute.Firewall) error
 	GetFirewallRule(projectID, name string) (*compute.Firewall, error)
 	DeleteFirewallRule(projectID, name string) error
@@ -56,15 +56,15 @@ type gcpClient struct {
 	computeClient *compute.Service
 }
 
-func (g *gcpClient) GetVpcPeering(projectID, networkName string) (*compute.Network, error) {
+func (g *gcpClient) GetNetwork(projectID, networkName string) (*compute.Network, error) {
 	return g.computeClient.Networks.Get(projectID, networkName).Context(context.TODO()).Do()
 }
 
-func (g *gcpClient) RemoveVpcPeering(projectID, networkName string, removePeeringRequest *compute.NetworksRemovePeeringRequest) error {
+func (g *gcpClient) DeleteVpcPeering(projectID, networkName string, removePeeringRequest *compute.NetworksRemovePeeringRequest) error {
 	_, err := g.computeClient.Networks.RemovePeering(projectID, networkName, removePeeringRequest).Context(context.TODO()).Do()
 	return err
 }
-func (g *gcpClient) PeerVpcs(projectID, networkName string, peeringRequest *compute.NetworksAddPeeringRequest) error {
+func (g *gcpClient) CreateVpcPeering(projectID, networkName string, peeringRequest *compute.NetworksAddPeeringRequest) error {
 	_, err := g.computeClient.Networks.AddPeering(projectID, networkName, peeringRequest).Context(context.TODO()).Do()
 	return err
 }

@@ -48,6 +48,20 @@ func (mr *MockInterfaceMockRecorder) ConfigurePublicIPOnInstance(instance interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConfigurePublicIPOnInstance", reflect.TypeOf((*MockInterface)(nil).ConfigurePublicIPOnInstance), instance)
 }
 
+// CreateVpcPeering mocks base method.
+func (m *MockInterface) CreateVpcPeering(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateVpcPeering", projectID, network, peeringRequest)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateVpcPeering indicates an expected call of CreateVpcPeering.
+func (mr *MockInterfaceMockRecorder) CreateVpcPeering(projectID, network, peeringRequest interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVpcPeering", reflect.TypeOf((*MockInterface)(nil).CreateVpcPeering), projectID, network, peeringRequest)
+}
+
 // DeleteFirewallRule mocks base method.
 func (m *MockInterface) DeleteFirewallRule(projectID, name string) error {
 	m.ctrl.T.Helper()
@@ -74,6 +88,20 @@ func (m *MockInterface) DeletePublicIPOnInstance(instance *compute.Instance) err
 func (mr *MockInterfaceMockRecorder) DeletePublicIPOnInstance(instance interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePublicIPOnInstance", reflect.TypeOf((*MockInterface)(nil).DeletePublicIPOnInstance), instance)
+}
+
+// DeleteVpcPeering mocks base method.
+func (m *MockInterface) DeleteVpcPeering(projectID, networkName string, removePeeringRequest *compute.NetworksRemovePeeringRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteVpcPeering", projectID, networkName, removePeeringRequest)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteVpcPeering indicates an expected call of DeleteVpcPeering.
+func (mr *MockInterfaceMockRecorder) DeleteVpcPeering(projectID, networkName, removePeeringRequest interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteVpcPeering", reflect.TypeOf((*MockInterface)(nil).DeleteVpcPeering), projectID, networkName, removePeeringRequest)
 }
 
 // GetFirewallRule mocks base method.
@@ -106,19 +134,19 @@ func (mr *MockInterfaceMockRecorder) GetInstance(zone, instance interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInstance", reflect.TypeOf((*MockInterface)(nil).GetInstance), zone, instance)
 }
 
-// GetVpcPeering mocks base method.
-func (m *MockInterface) GetVpcPeering(projectID, networkName string) (*compute.Network, error) {
+// GetNetwork mocks base method.
+func (m *MockInterface) GetNetwork(projectID, networkName string) (*compute.Network, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetVpcPeering", projectID, networkName)
+	ret := m.ctrl.Call(m, "GetNetwork", projectID, networkName)
 	ret0, _ := ret[0].(*compute.Network)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetVpcPeering indicates an expected call of GetVpcPeering.
-func (mr *MockInterfaceMockRecorder) GetVpcPeering(projectID, networkName interface{}) *gomock.Call {
+// GetNetwork indicates an expected call of GetNetwork.
+func (mr *MockInterfaceMockRecorder) GetNetwork(projectID, networkName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVpcPeering", reflect.TypeOf((*MockInterface)(nil).GetVpcPeering), projectID, networkName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetwork", reflect.TypeOf((*MockInterface)(nil).GetNetwork), projectID, networkName)
 }
 
 // InsertFirewallRule mocks base method.
@@ -178,34 +206,6 @@ func (m *MockInterface) ListZones() (*compute.ZoneList, error) {
 func (mr *MockInterfaceMockRecorder) ListZones() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListZones", reflect.TypeOf((*MockInterface)(nil).ListZones))
-}
-
-// PeerVpcs mocks base method.
-func (m *MockInterface) PeerVpcs(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PeerVpcs", projectID, network, peeringRequest)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// PeerVpcs indicates an expected call of PeerVpcs.
-func (mr *MockInterfaceMockRecorder) PeerVpcs(projectID, network, peeringRequest interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PeerVpcs", reflect.TypeOf((*MockInterface)(nil).PeerVpcs), projectID, network, peeringRequest)
-}
-
-// RemoveVpcPeering mocks base method.
-func (m *MockInterface) RemoveVpcPeering(projectID, networkName string, removePeeringRequest *compute.NetworksRemovePeeringRequest) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemoveVpcPeering", projectID, networkName, removePeeringRequest)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// RemoveVpcPeering indicates an expected call of RemoveVpcPeering.
-func (mr *MockInterfaceMockRecorder) RemoveVpcPeering(projectID, networkName, removePeeringRequest interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveVpcPeering", reflect.TypeOf((*MockInterface)(nil).RemoveVpcPeering), projectID, networkName, removePeeringRequest)
 }
 
 // UpdateFirewallRule mocks base method.

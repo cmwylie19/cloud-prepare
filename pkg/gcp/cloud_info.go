@@ -72,9 +72,9 @@ func (c *CloudInfo) deleteFirewallRule(name string, reporter api.Reporter) error
 	return nil
 }
 
-func (c *CloudInfo) peerVpcs(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest, reporter api.Reporter) error {
+func (c *CloudInfo) createVpcPeering(projectID, network string, peeringRequest *compute.NetworksAddPeeringRequest, reporter api.Reporter) error {
 	reporter.Started("Peering VPC %s with %s GCP", network, peeringRequest.PeerNetwork)
-	if err := c.Client.PeerVpcs(projectID, network, peeringRequest); err != nil {
+	if err := c.Client.CreateVpcPeering(projectID, network, peeringRequest); err != nil {
 		reporter.Failed(err)
 		return errors.Wrapf(err, "error peering vpc %q on GCP", peeringRequest.Name)
 	}
@@ -82,9 +82,9 @@ func (c *CloudInfo) peerVpcs(projectID, network string, peeringRequest *compute.
 	return nil
 }
 
-func (c *CloudInfo) removeVpcPeering(projectID, network string, removePeeringRequest *compute.NetworksRemovePeeringRequest, reporter api.Reporter) error {
+func (c *CloudInfo) deleteVpcPeering(projectID, network string, removePeeringRequest *compute.NetworksRemovePeeringRequest, reporter api.Reporter) error {
 	reporter.Started("Removing VPC Peering %s.", removePeeringRequest.Name)
-	if err := c.Client.RemoveVpcPeering(projectID, network, removePeeringRequest); err != nil {
+	if err := c.Client.DeleteVpcPeering(projectID, network, removePeeringRequest); err != nil {
 		reporter.Failed(err)
 		return errors.Wrapf(err, "error peering vpc %q on GCP", removePeeringRequest.Name)
 	}

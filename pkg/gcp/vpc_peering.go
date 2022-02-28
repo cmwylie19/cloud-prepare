@@ -19,21 +19,23 @@ package gcp
 
 import (
 	"fmt"
+	"reflect"
 
+	"github.com/submariner-io/cloud-prepare/pkg/api"
 	"google.golang.org/api/compute/v1"
 )
 
-func removeVpcPeeringRequest(infraID string) *compute.NetworksRemovePeeringRequest {
+func RemoveVpcPeeringRequest(infraID string) *compute.NetworksRemovePeeringRequest {
 	return &compute.NetworksRemovePeeringRequest{
-		Name: generatePeeringName(infraID),
+		Name: GeneratePeeringName(infraID),
 	}
 }
-func newVpcPeeringRequest(infraID, targetNetwork string) *compute.NetworksAddPeeringRequest {
+func NewVpcPeeringRequest(infraID, targetNetwork string) *compute.NetworksAddPeeringRequest {
 	return &compute.NetworksAddPeeringRequest{
-		Name:             generatePeeringName(infraID),
+		Name:             GeneratePeeringName(infraID),
 		PeerNetwork:      targetNetwork,
 		AutoCreateRoutes: true,
-		// This causes the request to fail
+		// This causes the request to fail, leave commented for review
 
 		// NetworkPeering: &compute.NetworkPeering{
 		// 	ImportCustomRoutes:   true,
@@ -42,6 +44,23 @@ func newVpcPeeringRequest(infraID, targetNetwork string) *compute.NetworksAddPee
 	}
 }
 
-func generatePeeringName(infraID string) string {
+func GeneratePeeringName(infraID string) string {
 	return fmt.Sprintf("%s-peering", infraID)
+}
+
+// Format network short URL
+func GetNetworkURL(projectID, infraID string) string {
+	return fmt.Sprintf("projects/%s/global/networks/%s-network", projectID, infraID)
+}
+
+// Extract values from target
+func ExtractValuesFromTarget(target api.Cloud) (string, string) {
+	// Extract CloudInfo from Target
+	target_values := reflect.ValueOf(target).Elem()
+	cloud_info := target_values.FieldByName("CloudInfo")
+
+	projectID := fmt.Sprintf("%s", cloud_info.FieldByName("ProjectID"))
+	infraID := fmt.Sprintf("%s", cloud_info.FieldByName("InfraID"))
+
+	return projectID, infraID
 }
