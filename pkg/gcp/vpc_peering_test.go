@@ -18,17 +18,11 @@ limitations under the License.
 package gcp_test
 
 import (
-	// "errors"
 	"fmt"
-	// "github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	// . "github.com/onsi/gomega"
 	"github.com/submariner-io/cloud-prepare/pkg/api"
 	"github.com/submariner-io/cloud-prepare/pkg/gcp"
-	// "google.golang.org/api/compute/v1"
-	// "google.golang.org/api/googleapi"
-	// "net/http"
 )
 
 type invalidCloud struct{}
@@ -47,9 +41,7 @@ func (f *invalidCloud) CleanupAfterSubmariner(reporter api.Reporter) error {
 
 var _ = Describe("GCP Peering", func() {
 	Context("VpcHelperFunctions", testVpcHelperFunctions)
-	// Context("CreateGCPPeering", testCreateGCPPeering)
 	Context("CreateVpcPeering", testCreateVpcPeering)
-	// Context("DeleteVpcPeering", testDeleteVpcPeering)
 })
 
 func testCreateVpcPeering() {
