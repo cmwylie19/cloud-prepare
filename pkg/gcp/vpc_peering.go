@@ -19,9 +19,7 @@ package gcp
 
 import (
 	"fmt"
-	"reflect"
 
-	"github.com/submariner-io/cloud-prepare/pkg/api"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -51,16 +49,4 @@ func GeneratePeeringName(infraID string) string {
 // Format network short URL
 func GetNetworkURL(projectID, infraID string) string {
 	return fmt.Sprintf("projects/%s/global/networks/%s-network", projectID, infraID)
-}
-
-// Extract values from target
-func ExtractValuesFromTarget(target api.Cloud) (string, string) {
-	// Extract CloudInfo from Target
-	target_values := reflect.ValueOf(target).Elem()
-	cloud_info := target_values.FieldByName("CloudInfo")
-
-	projectID := fmt.Sprintf("%s", cloud_info.FieldByName("ProjectID"))
-	infraID := fmt.Sprintf("%s", cloud_info.FieldByName("InfraID"))
-
-	return projectID, infraID
 }

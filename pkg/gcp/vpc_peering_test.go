@@ -56,15 +56,7 @@ func testCreateVpcPeering() {
 }
 
 func testVpcHelperFunctions() {
-	cloudB := newTargetCloudTestDriver()
-
-	When("ExtractValuesFromTarget is called with a target cloud", func() {
-		It("should return the correct values for projectID and infraID", func() {
-			projectID, infraID := gcp.ExtractValuesFromTarget(cloudB.cloud)
-			Expect(projectID).To(Equal(targetProjectID))
-			Expect(infraID).To(Equal(targetInfraID))
-		})
-	})
+	// cloudB := newTargetCloudTestDriver()
 
 	When("GetNetworkURL is called with projectID and infraID", func() {
 		It("should return short network url", func() {
