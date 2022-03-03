@@ -21,6 +21,7 @@ import (
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
 	"github.com/submariner-io/cloud-prepare/pkg/api"
 	"github.com/submariner-io/cloud-prepare/pkg/gcp"
 )
@@ -56,8 +57,26 @@ func testCreateVpcPeering() {
 }
 
 func testVpcHelperFunctions() {
-	// cloudB := newTargetCloudTestDriver()
+	When("RunWithRetries is called with number of attempts and waitTime", func() {
+		It("Should call the function N times", func() {
+			var err error
+			errorFn := func() error {
+				return errors.New("err")
+			}
 
+			noErrorFn := func() error {
+				return nil
+			}
+
+			const waitTime = 0
+
+			err = gcp.RunWithRetries(waitTime, errorFn)
+			Expect(err).To(HaveOccurred())
+
+			err = gcp.RunWithRetries(waitTime, noErrorFn)
+			Expect(err).To(Not(HaveOccurred()))
+		})
+	})
 	When("GetNetworkURL is called with projectID and infraID", func() {
 		It("should return short network url", func() {
 			network_url := gcp.GetNetworkURL(projectID, infraID)

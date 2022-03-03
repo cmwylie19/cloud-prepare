@@ -141,12 +141,22 @@ func (gc *gcpCloud) CleanupVpcPeering(target api.Cloud, reporter api.Reporter) e
 		return err
 	}
 
-	// Peer Target VPC with VPC (B-A)
-	if err := gc.deleteVpcPeering(targetCloud.ProjectID, TARGET_NETWORK_NAME, targetRemovePeeringRequest, reporter); err != nil {
-		err_msg := errors.Wrapf(err, "Failed peering from target to host %s to %s", TARGET_NETWORK_NAME, NETWORK_NAME)
-		reporter.Failed(err_msg)
-		return err
+	// Peer Target VPC with VPC (B-A) with retries as you cannot delete at the same time
+	deletePeeringFn := func() error {
+		return gc.deleteVpcPeering(targetCloud.ProjectID, TARGET_NETWORK_NAME, targetRemovePeeringRequest, reporter)
 	}
+
+	deleteError := RunWithRetries(10, deletePeeringFn)
+	if deleteError != nil {
+		err_msg := errors.Wrapf(deleteError, "Failed peering from target to host %s to %s", TARGET_NETWORK_NAME, NETWORK_NAME)
+		reporter.Failed(err_msg)
+		return err_msg
+	}
+	// if err := gc.deleteVpcPeering(targetCloud.ProjectID, TARGET_NETWORK_NAME, targetRemovePeeringRequest, reporter); err != nil {
+	// 	err_msg := errors.Wrapf(err, "Failed peering from target to host %s to %s", TARGET_NETWORK_NAME, NETWORK_NAME)
+	// 	reporter.Failed(err_msg)
+	// 	return err
+	// }
 
 	reporter.Succeeded("Removed Peering between VPCs %q and %q", NETWORK_NAME, TARGET_NETWORK_NAME)
 

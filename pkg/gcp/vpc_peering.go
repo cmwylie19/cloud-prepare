@@ -19,8 +19,14 @@ package gcp
 
 import (
 	"fmt"
+	"time"
 
 	"google.golang.org/api/compute/v1"
+)
+
+const (
+	attempts = 3
+	waitTime = 10
 )
 
 func RemoveVpcPeeringRequest(infraID string) *compute.NetworksRemovePeeringRequest {
@@ -49,4 +55,20 @@ func GeneratePeeringName(infraID string) string {
 // Format network short URL
 func GetNetworkURL(projectID, infraID string) string {
 	return fmt.Sprintf("projects/%s/global/networks/%s-network", projectID, infraID)
+}
+
+func RunWithRetries(numSeconds int, f func() error) error {
+	var err error
+	for retries := attempts; retries > 0; {
+		err = f()
+		if err != nil {
+			retries--
+
+			time.Sleep(time.Duration(numSeconds) * time.Second)
+		} else {
+			return nil
+		}
+	}
+
+	return err
 }
